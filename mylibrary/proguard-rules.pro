@@ -18,5 +18,5 @@
 -dontwarn cn.socks.library.**
 -keep class cn.socks.library.** { *; }
 
--dontwarn com.gmx.utils.**
+-dontwarn com.gmx.**
 -keep class com.gmx.** { *; }
