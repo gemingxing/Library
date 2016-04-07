@@ -7,7 +7,7 @@ import java.io.File;
  * <p/>
  * implements https://github.com/ZhaoKaiQiang/KLog
  */
-public class KLog implements IKLog {
+public class GLog implements IGLog {
 
     /**
      * 初始化

@@ -5,7 +5,7 @@ import java.io.File;
 /**
  * Created by MingXing on 16/4/7.
  */
-public interface IKLog {
+public interface IGLog {
 
     void v(Object msg);
 
