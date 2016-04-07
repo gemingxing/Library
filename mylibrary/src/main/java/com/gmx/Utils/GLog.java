@@ -1,13 +1,15 @@
-package gmx.utils;
+package com.gmx.utils;
 
 import android.text.TextUtils;
 
+import com.gmx.log.BaseLog;
+import com.gmx.log.FileLog;
+import com.gmx.log.JsonLog;
+import com.gmx.log.XmlLog;
+
 import java.io.File;
 
-import gmx.log.BaseLog;
-import gmx.log.FileLog;
-import gmx.log.JsonLog;
-import gmx.log.XmlLog;
+
 
 /**
  * Created by MingXing on 16/4/7.
