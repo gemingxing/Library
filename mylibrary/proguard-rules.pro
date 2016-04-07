@@ -15,3 +15,8 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+-dontwarn cn.socks.library.**
+-keep class cn.socks.library.** { *; }
+
+-dontwarn com.gmx.utils.**
+-keep class com.gmx.** { *; }

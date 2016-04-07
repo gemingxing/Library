@@ -1,4 +1,4 @@
-package com.gmx.Utils;
+package com.gmx.utils;
 
 import java.io.File;
 
