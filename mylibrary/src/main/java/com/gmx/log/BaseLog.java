@@ -1,8 +1,8 @@
-package gmx.log;
+package com.gmx.log;
 
 import android.util.Log;
 
-import gmx.utils.GLog;
+import com.gmx.utils.GLog;
 
 
 public class BaseLog {

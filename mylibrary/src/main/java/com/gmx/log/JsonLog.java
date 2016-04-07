@@ -1,12 +1,13 @@
-package gmx.log;
+package com.gmx.log;
 
 import android.util.Log;
+
+import com.gmx.utils.GLog;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import gmx.utils.GLog;
 
 public class JsonLog {
 

@@ -1,6 +1,8 @@
-package gmx.log;
+package com.gmx.log;
 
 import android.util.Log;
+
+import com.gmx.utils.GLog;
 
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -12,7 +14,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import gmx.utils.GLog;
 
 public class XmlLog {
 

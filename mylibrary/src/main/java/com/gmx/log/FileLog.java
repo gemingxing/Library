@@ -1,4 +1,4 @@
-package gmx.log;
+package com.gmx.log;
 
 import android.util.Log;
 
