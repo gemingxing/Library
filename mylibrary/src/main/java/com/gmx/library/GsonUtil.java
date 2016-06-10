@@ -137,9 +137,7 @@ public class GsonUtil {
                         return null;
                     }
                 }).setDateFormat(pattern).create();
-        if (gson != null) {
-            obj = gson.fromJson(jsonStr, cl);
-        }
+        obj = gson.fromJson(jsonStr, cl);
         return (T) obj;
     }
 

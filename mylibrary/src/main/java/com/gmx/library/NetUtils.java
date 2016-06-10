@@ -32,7 +32,6 @@ import java.util.List;
 
 
 public class NetUtils {
-
     public static final String NETWORK_TYPE_WIFI = "wifi";
     public static final String NETWORK_TYPE_3G = "3g";
     public static final String NETWORK_TYPE_2G = "2g";
@@ -116,7 +115,6 @@ public class NetUtils {
     /**
      * Whether is fast mobile network
      */
-
     private static boolean isFastMobileNetwork(Context context) {
         TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         if (telephonyManager == null) {
