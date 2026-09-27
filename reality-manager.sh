@@ -535,7 +535,7 @@ def deploy():
     address = host(ask("VPS 公网 IPv4 或域名"))
     selected_port = port(ask("入口 TCP 端口", "443"))
     preflight(selected_port)
-    sni = host(ask("REALITY 目标域名", "www.lovelive-anime.jp"))
+    sni = host(ask("REALITY 目标域名", "www.bing.com"))
     context = ssl.create_default_context()
     context.minimum_version = ssl.TLSVersion.TLSv1_3
     context.set_alpn_protocols(["h2"])
