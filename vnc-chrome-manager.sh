@@ -254,23 +254,35 @@ ensure_display_available() {
 }
 
 write_vnc_configuration() {
-    local home vnc_dir
+    local home config_home vnc_dir legacy_dir
     home="$(user_home)"
     [[ -n "${home}" && "${home}" == /home/* ]] || \
         die "用户 ${MANAGED_USER} 的主目录 ${home:-为空} 不在 /home 下，拒绝写入。"
-    vnc_dir="${home}/.vnc"
+    config_home="${home}/.config"
+    vnc_dir="${config_home}/tigervnc"
+    legacy_dir="${home}/.vnc"
 
-    install -d -m 700 -o "${MANAGED_USER}" -g "${MANAGED_USER}" "${vnc_dir}"
+    # 原因：TigerVNC 1.15 使用 ~/.config/tigervnc，而旧版 Debian 仍读取 ~/.vnc；
+    # 例如：Debian 13 直接使用旧目录时会尝试迁移，但缺少 ~/.config 父目录会导致服务退出；
+    # 所以将真实配置写入新目录，并用 ~/.vnc 符号链接兼容旧版 TigerVNC。
+    [[ ! -e "${legacy_dir}" && ! -L "${legacy_dir}" ]] || \
+        die "路径 ${legacy_dir} 已存在，拒绝覆盖未知的 VNC 配置。"
+    install -d -m 700 -o "${MANAGED_USER}" -g "${MANAGED_USER}" \
+        "${config_home}" "${vnc_dir}"
+    ln -s ".config/tigervnc" "${legacy_dir}"
+    chown -h "${MANAGED_USER}:${MANAGED_USER}" "${legacy_dir}"
     (umask 077; printf '%s\n' "${VNC_PASSWORD}" | tigervncpasswd -f > "${vnc_dir}/passwd")
     chown "${MANAGED_USER}:${MANAGED_USER}" "${vnc_dir}/passwd"
     {
-        printf '\$session = "xfce";\n'
-        printf '\$geometry = "%s";\n' "${GEOMETRY}"
-        printf '\$depth = "24";\n'
-        printf '\$localhost = "yes";\n'
-    } > "${vnc_dir}/tigervnc.conf"
-    chown "${MANAGED_USER}:${MANAGED_USER}" "${vnc_dir}/tigervnc.conf"
-    chmod 600 "${vnc_dir}/tigervnc.conf"
+        printf '$session = "xfce";\n'
+        printf '$geometry = "%s";\n' "${GEOMETRY}"
+        printf '$depth = "24";\n'
+        printf '$localhost = "yes";\n'
+    } > "${vnc_dir}/config.pl"
+    chown "${MANAGED_USER}:${MANAGED_USER}" "${vnc_dir}/config.pl"
+    chmod 600 "${vnc_dir}/config.pl"
+    ln -s "config.pl" "${vnc_dir}/tigervnc.conf"
+    chown -h "${MANAGED_USER}:${MANAGED_USER}" "${vnc_dir}/tigervnc.conf"
 }
 
 write_user_mapping() {
@@ -376,11 +388,23 @@ start_vnc() {
     validate_settings
     [[ -f "${STATE_FILE}" ]] || die "未找到安装状态，请先执行 install。"
     systemctl start "$(service_name)"
-    systemctl is-active --quiet "$(service_name)" || \
-        die "VNC 启动失败，请执行 journalctl -u $(service_name) 查看日志。"
 
-    printf 'VNC 已启动：显示号 :%s，端口 %s，仅监听 127.0.0.1。\n' \
-        "${DISPLAY_NUM}" "$((5900 + DISPLAY_NUM))"
+    # systemd 的 Type=forking 可能先报告启动成功，而桌面会话随后才因配置错误退出。
+    # 等待服务和端口共同稳定，避免向调用者返回“已启动”但实际无法连接的结果。
+    local port attempt
+    port="$((5900 + DISPLAY_NUM))"
+    for attempt in {1..5}; do
+        sleep 1
+        if systemctl is-active --quiet "$(service_name)" \
+            && ss -lnt 2>/dev/null | grep -Eq "(127\\.0\\.0\\.1|\\[::1\\]):${port}([[:space:]]|$)"; then
+            printf 'VNC 已启动：显示号 :%s，端口 %s，仅监听 127.0.0.1。\n' \
+                "${DISPLAY_NUM}" "${port}"
+            return 0
+        fi
+    done
+
+    journalctl -u "$(service_name)" --no-pager -n 30 >&2 || true
+    die "VNC 启动失败或端口 ${port} 未监听。"
 }
 
 stop_vnc() {
@@ -402,7 +426,8 @@ status_vnc() {
     printf '监听端口：\n'
     ss -lntp 2>/dev/null | awk -v port=":${port}" '$4 ~ port {print "  " $0}' || true
     printf 'Chrome：%s\n' "$(google-chrome --version 2>/dev/null || printf '未安装')"
-    printf 'TigerVNC：%s\n' "$(Xvnc -version 2>&1 | awk 'NR == 2 {print; exit}' || true)"
+    printf 'TigerVNC：%s\n' \
+        "$(dpkg-query -W -f='${Version}' tigervnc-standalone-server 2>/dev/null || printf '未安装')"
 }
 
 main() {
