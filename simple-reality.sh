@@ -529,6 +529,7 @@ install_proxy() {
 
   echo
   echo "安装成功，服务已运行并设置开机启动。"
+  echo "开机启动：$(systemctl is-enabled "$SERVICE_NAME")"
   show_proxy
   echo
   echo "管理命令：simple-reality status | show | add-hysteria2 | uninstall"
@@ -563,9 +564,11 @@ uninstall_proxy() {
 show_proxy() {
   require_root
   [[ -e "$MARKER_FILE" && -f "$SHARE_FILE" ]] || fail "尚未安装。"
+  echo "VLESS + REALITY 节点分享链接："
   cat "$SHARE_FILE"
   if [[ -f "$HY2_SHARE_FILE" ]]; then
     echo
+    echo "Hysteria2 节点分享链接："
     cat "$HY2_SHARE_FILE"
     echo
     echo "Hysteria2 Clash 节点片段（需合并到客户端配置并加入代理组）："
